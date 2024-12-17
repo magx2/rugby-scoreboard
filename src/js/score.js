@@ -35,15 +35,6 @@ async function updateScore(team, points) {
     // Adjust points based on toggle
     const addPoints = toggle.checked ? points : -points;
 
-    // Update score locally
-    if (team === 'home') {
-        homeScore += addPoints;
-        document.getElementById('home-score').innerText = homeScore;
-    } else if (team === 'away') {
-        awayScore += addPoints;
-        document.getElementById('away-score').innerText = awayScore;
-    }
-
     // Send request to REST endpoint
     try {
         const response = await fetch(`/score/${team}`, {
@@ -54,6 +45,15 @@ async function updateScore(team, points) {
 
         if (!response.ok) {
             throw new Error(`Error: ${response.statusText}`);
+        }
+
+        // Update score locally
+        if (team === 'home') {
+            homeScore += addPoints;
+            document.getElementById('home-score').innerText = homeScore;
+        } else if (team === 'away') {
+            awayScore += addPoints;
+            document.getElementById('away-score').innerText = awayScore;
         }
     } catch (error) {
         console.error('Failed to update score:', error);
