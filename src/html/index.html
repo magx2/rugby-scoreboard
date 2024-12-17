@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Scoreboard</h1>
+
+    <!-- Score Display -->
+    <div class="scoreboard">
+        <div class="team">
+            <h2>Home</h2>
+            <p id="home-score">0</p>
+            <div class="controls">
+                <button onclick="updateScore('home', 7)">Try</button>
+                <button onclick="updateScore('home', 2)">Conversion</button>
+                <button onclick="updateScore('home', 3)">Penalty</button>
+            </div>
+        </div>
+
+        <div class="team">
+            <h2>Away</h2>
+            <p id="away-score">0</p>
+            <div class="controls">
+                <button onclick="updateScore('away', 7)">Try</button>
+                <button onclick="updateScore('away', 2)">Conversion</button>
+                <button onclick="updateScore('away', 3)">Penalty</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle for Add/Remove Points -->
+    <div class="toggle">
+        <label>
+            <input type="checkbox" id="toggle-add-remove" checked>
+            Add Points
+        </label>
+    </div>
+</div>
+
+<script src="score.js"></script>
+</body>
+</html>

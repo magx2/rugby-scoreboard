@@ -1,0 +1,81 @@
+minification {
+    js { //this: JsMinifyTask
+        srcDir = project.file("src/js")
+        dstDir = project.file("build/frontend")
+    }
+    css { //this: CssMinifyTask
+        srcDir = project.file("src/css")
+        dstDir = project.file("build/frontend")
+    }
+}
+
+tasks.register('htmlMinify') {
+    description = 'Minifies an HTML file'
+
+    def inputFile = file('src/html/index.html')
+    def outputFile = file('build/frontend/index.min.html')
+
+    inputs.file inputFile
+    outputs.file outputFile
+
+    doFirst {
+        def htmlContent = inputFile.text
+
+        // Simple minification logic: removes extra whitespaces, newlines, and tabs
+        def minifiedContent = htmlContent
+                .replaceAll(/>\s+</, '><')  // Remove spaces between tags
+                .replaceAll(/\s{2,}/, ' ') // Replace multiple spaces with one
+                .replaceAll(/[\n\r\t]/, '') // Remove newlines and tabs
+                .replaceAll(/<link rel="stylesheet" href="([^"]+)\.css">/, '<link rel="stylesheet" href="$1.min.css">')
+                .replaceAll(/<script src="([^"]+)\.js"><\/script>/, '<script src="$1.min.js"></script>')
+
+        // Ensure output directory exists
+        outputFile.parentFile.mkdirs()
+
+        // Write the minified content
+        outputFile.text = minifiedContent
+    }
+}
+task('minify').dependsOn("jsMinify", "cssMinify", "htmlMinify")
+
+import java.util.zip.GZIPOutputStream
+
+task gzipFrontendFiles {
+    description = 'Gzips all files from build/frontend and outputs them to build/frontend-gz'
+    group = 'build'
+    dependsOn('minify')
+
+    def inputDir = file('build/frontend') // Source directory
+    def outputDir = file('build/frontend-gz') // Target directory for gzipped files
+
+    inputs.dir inputDir
+    outputs.dir outputDir
+
+    doLast {
+        // Ensure output directory exists
+        outputDir.mkdirs()
+
+        inputDir.eachFileRecurse { file ->
+            if (file.isFile()) {
+                // Define output .gz file path
+                def relativePath = inputDir.toPath().relativize(file.toPath()).toString()
+                def outputFile = new File(outputDir, relativePath + '.gz')
+
+                // Ensure parent directories exist
+                outputFile.parentFile.mkdirs()
+
+                // Perform GZIP compression
+                logger.info "Gzipping: ${file} -> ${outputFile}"
+                file.withInputStream { inputStream ->
+                    outputFile.withOutputStream { outputStream ->
+                        def gzipStream = new GZIPOutputStream(outputStream)
+                        gzipStream.withCloseable {
+                            it << inputStream
+                        }
+                    }
+                }
+            }
+        }
+        logger.info "Gzip compression complete! Files are in: ${outputDir}"
+    }
+}
