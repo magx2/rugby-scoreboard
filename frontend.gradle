@@ -11,7 +11,6 @@ minification {
 
 task htmlMinify {
     description = 'Minifies an HTML file'
-    dependsOn
 
     def inputFile = file('src/html/index.html')
     def outputFile = file('build/frontend/index.min.html')
@@ -19,27 +18,39 @@ task htmlMinify {
     inputs.file inputFile
     outputs.file outputFile
 
+    def version = project.version as String
+
     doFirst {
         def htmlContent = inputFile.text
 
         // Simple minification logic: removes extra whitespaces, newlines, and tabs
+        def now = ZonedDateTime.now().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
         def minifiedContent = htmlContent
                 .replaceAll(/>\s+</, '><')  // Remove spaces between tags
                 .replaceAll(/\s{2,}/, ' ') // Replace multiple spaces with one
                 .replaceAll(/[\n\r\t]/, '') // Remove newlines and tabs
+                .replaceAll(/<!--.*?-->/, '') // Remove comments
                 .replaceAll(/<link rel="stylesheet" href="([^"]+)\.css">/, '<link rel="stylesheet" href="$1.min.css">')
                 .replaceAll(/<script src="([^"]+)\.js"><\/script>/, '<script src="$1.min.js"></script>')
+                .replaceAll(/\{version}/, version)
+                .replaceAll(/\{uploadDate}/, now)
 
         // Ensure output directory exists
         outputFile.parentFile.mkdirs()
 
         // Write the minified content
         outputFile.text = minifiedContent
+
+        logger.lifecycle "Minified HTML with: version=$version, uploadDate=$now"
     }
 }
 
 task('minify').dependsOn("jsMinify", "cssMinify", "htmlMinify")
 
+
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.zip.GZIPOutputStream
 
 task gzipFrontendFiles {

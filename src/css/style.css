@@ -6,8 +6,16 @@
     font-family: Arial, sans-serif;
 }
 
-/* Responsive container */
+/* Flexbox layout for full-height page */
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Container takes up remaining space between header and footer */
 .container {
+    flex: 1;
     max-width: 500px;
     margin: 0 auto;
     padding: 10px;
@@ -72,4 +80,16 @@ h1 {
 
 .toggle input {
     margin-right: 5px;
+}
+
+/* Footer Styles */
+footer {
+    margin-top: auto; /* Pushes footer to the bottom */
+    font-size: 0.9em;
+    color: #777;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    width: 100%;
+    background-color: #f9f9f9;
 }
