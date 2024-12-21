@@ -1,4 +1,5 @@
 task boards(type: Exec) {
+    group 'ESP'
     dependsOn 'downloadArduinoCli'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'board', 'list'
 }
@@ -10,6 +11,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 import java.nio.file.Files
 
 task downloadMklittlefs {
+    group 'ESP'
     // Take releases from https://github.com/earlephilhower/mklittlefs/releases
     def baseUrl = "https://github.com/earlephilhower/mklittlefs/releases/download/4.0.1"
     def downloadUrl = "$baseUrl/x86_64-w64-mingw32-mklittlefs-cc32c94.zip"
@@ -45,12 +47,14 @@ task downloadMklittlefs {
 }
 
 task bundleFileSystem(type: Copy) {
+    group 'ESP'
     dependsOn 'gzipFrontendFiles', 'saveWifiConfig'
     from 'build/frontend-gz', 'build/wifi_config.txt'
     into 'build/filesystem'
 }
 
 task createFilesystem(type: Exec) {
+    group 'ESP'
     dependsOn 'downloadMklittlefs', 'bundleFileSystem'
     def output = file("build/littlefs/data.bin")
     outputs.file output
@@ -73,6 +77,7 @@ task installEspTool(type: Exec) {
 }
 
 task uploadFilesystem(type: Exec) {
+    group 'ESP'
     dependsOn 'createFilesystem', 'installEspTool'
     workingDir 'build/littlefs'
     commandLine 'python', '-m', 'esptool',
@@ -153,6 +158,7 @@ task installArduinoJsonLibrary(type: Exec) {
 task('installArduinoLibraries').dependsOn('installEspBoard', 'installAsyncTcpLibrary', 'installArduinoJsonLibrary')
 
 task compileCode(type: Exec) {
+    group 'ESP'
     dependsOn 'installArduinoLibraries'
     inputs.dir('src/ino/rugby')
     outputs.dir('build/esp/rugby')
@@ -167,6 +173,7 @@ task compileCode(type: Exec) {
 }
 
 task uploadCode(type: Exec) {
+    group 'ESP'
     //noinspection GroovyAccessibility
     description = 'Upload code to ESP32 using Arduino CLI'
     dependsOn 'compileCode'
@@ -191,6 +198,7 @@ static def generateRandomPassword(length) {
 }
 
 task saveWifiConfig {
+    group 'ESP'
     def MIN_WIFI_PASS_LENGTH = 8
     // Define inputs during the configuration phase
     def ssid = project.hasProperty('wifi_ssid') ? project.wifi_ssid : 'rugby'
@@ -301,26 +309,31 @@ task version {
 }
 
 task versionMklittlefs(type: Exec) {
+    group 'version'
     dependsOn 'downloadMklittlefs'
 
     commandLine file("build/mklittlefs/mklittlefs.exe"), '--version'
 }
 
 task versionPython(type: Exec) {
+    group 'version'
     commandLine 'python', '--version'
 }
 
 task versionEsptool(type: Exec) {
+    group 'version'
     commandLine 'python', '-m', 'esptool', 'version'
 }
 
 task versionArduino(type: Exec) {
+    group 'version'
     commandLine 'arduino-cli.exe', 'version'
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
 task versionOs {
+    group 'version'
     //noinspection GroovyAccessibility
     def os_name = Os.OS_NAME
     //noinspection GroovyAccessibility
@@ -333,6 +346,7 @@ task versionOs {
 }
 
 task version {
+    group 'version'
     dependsOn 'versionMklittlefs', 'versionPython', 'versionEsptool', 'versionArduino', 'versionOs'
     def version = project.version
     doLast {

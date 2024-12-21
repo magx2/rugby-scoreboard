@@ -10,6 +10,7 @@ minification {
 }
 
 task htmlMinify {
+    group 'frontend'
     description = 'Minifies an HTML file'
 
     def inputFile = file('src/html/index.html')
@@ -54,8 +55,8 @@ import java.time.format.FormatStyle
 import java.util.zip.GZIPOutputStream
 
 task gzipFrontendFiles {
+    group 'frontend'
     description = 'Gzips all files from build/frontend and outputs them to build/frontend-gz'
-    group = 'build'
     dependsOn('minify')
 
     def inputDir = file('build/frontend') // Source directory
