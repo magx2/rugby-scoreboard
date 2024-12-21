@@ -80,6 +80,7 @@ task uploadFilesystem(type: Exec) {
     group 'ESP'
     dependsOn 'createFilesystem', 'installEspTool'
     workingDir 'build/littlefs'
+    outputs.cacheIf { false }
     commandLine 'python', '-m', 'esptool',
             '--chip', "${project.esptool_chip}",
             '--port', findPort(),
@@ -164,7 +165,7 @@ task compileCode(type: Exec) {
     outputs.dir('build/esp/rugby')
     def fqbn = project.fqbn
     doFirst {
-        logger.lifecycle("Compiling for FQBN ${ fqbn}")
+        logger.lifecycle("Compiling for FQBN ${fqbn}")
     }
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'compile',
             '--fqbn', "$fqbn",
@@ -183,7 +184,7 @@ task uploadCode(type: Exec) {
     def port = findPort()
     def fqbn = project.fqbn
     doFirst {
-        logger.lifecycle("Uploading for FQBN ${ fqbn}, port=${port}")
+        logger.lifecycle("Uploading for FQBN ${fqbn}, port=${port}")
     }
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'upload',
             '-p', port,
@@ -285,52 +286,6 @@ task versionArduino(type: Exec) {
     dependsOn 'downloadArduinoCli'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'version'
 }
-
-task versionOs {
-    group 'version'
-    //noinspection GroovyAccessibility
-    def os_name = Os.OS_NAME
-    //noinspection GroovyAccessibility
-    def os_arch = Os.OS_ARCH
-    //noinspection GroovyAccessibility
-    def os_version = Os.OS_VERSION
-    doLast {
-        logger.lifecycle("OS: name=${os_name}, arch=${os_arch}, version=${os_version}")
-    }
-}
-
-task version {
-    group 'version'
-    dependsOn 'versionMklittlefs', 'versionPython', 'versionEsptool', 'versionArduino', 'versionOs'
-    def version = project.version
-    doLast {
-        logger.lifecycle("App version=$version")
-    }
-}
-
-task versionMklittlefs(type: Exec) {
-    group 'version'
-    dependsOn 'downloadMklittlefs'
-
-    commandLine file("build/mklittlefs/mklittlefs.exe"), '--version'
-}
-
-task versionPython(type: Exec) {
-    group 'version'
-    commandLine 'python', '--version'
-}
-
-task versionEsptool(type: Exec) {
-    group 'version'
-    commandLine 'python', '-m', 'esptool', 'version'
-}
-
-task versionArduino(type: Exec) {
-    group 'version'
-    commandLine 'arduino-cli.exe', 'version'
-}
-
-import org.apache.tools.ant.taskdefs.condition.Os
 
 task versionOs {
     group 'version'
