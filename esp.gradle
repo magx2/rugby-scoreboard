@@ -1,0 +1,301 @@
+task boards(type: Exec) {
+    dependsOn 'downloadArduinoCli'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'board', 'list'
+}
+
+
+import groovy.transform.TupleConstructor
+import org.apache.tools.ant.taskdefs.condition.Os
+
+import java.nio.file.Files
+
+task downloadMklittlefs {
+    // Take releases from https://github.com/earlephilhower/mklittlefs/releases
+    def baseUrl = "https://github.com/earlephilhower/mklittlefs/releases/download/4.0.1"
+    def downloadUrl = "$baseUrl/x86_64-w64-mingw32-mklittlefs-cc32c94.zip"
+    def outputDir = file('build/mklittlefs')
+    def tempFile = Files.createTempFile("mklittlefs", ".zip").toFile()
+
+    outputs.dir outputDir
+
+    doLast {
+        logger.lifecycle("Downloading mklittlefs from $downloadUrl")
+        tempFile.withOutputStream { outputStream ->
+            new URL(downloadUrl).openStream().withStream { inputStream ->
+                outputStream << inputStream
+            }
+        }
+        logger.lifecycle("Downloaded mklittlefs to temporary file: ${tempFile.absolutePath}")
+
+        // Extract zip and remove extra folder
+        def tempExtractDir = Files.createTempDirectory("mklittlefs_extract").toFile()
+        ant.unzip(src: tempFile, dest: tempExtractDir)
+
+        tempExtractDir.listFiles().find { it.isDirectory() }?.eachFile { file ->
+            file.renameTo(new File(outputDir as File, file.name))
+        }
+        tempExtractDir.deleteDir()
+
+        logger.lifecycle("Extracted mklittlefs to directory: ${outputDir.absolutePath}")
+
+        // Cleanup temporary file
+        tempFile.delete()
+        logger.lifecycle("Deleted temporary file: ${tempFile.absolutePath}")
+    }
+}
+
+task bundleFileSystem(type: Copy) {
+    dependsOn 'gzipFrontendFiles', 'saveWifiConfig'
+    from 'build/frontend-gz', 'build/wifi_config.txt'
+    into 'build/filesystem'
+}
+
+task createFilesystem(type: Exec) {
+    dependsOn 'downloadMklittlefs', 'bundleFileSystem'
+    def output = file("build/littlefs/data.bin")
+    outputs.file output
+
+    doFirst {
+        output.parentFile.mkdirs()
+    }
+
+    commandLine file("build/mklittlefs/mklittlefs.exe"),
+            "-c", file("build/filesystem"),
+            "-p", "${project.mklittlefs_page_size}",
+            "-b", "${project.mklittlefs_block_size}",
+            "-s", "${project.mklittlefs_image_size}",
+            output
+}
+
+task installEspTool(type: Exec) {
+    group 'ESP'
+    commandLine 'pip', 'install', 'esptool==4.8.1'
+}
+
+task uploadFilesystem(type: Exec) {
+    dependsOn 'createFilesystem', 'installEspTool'
+    workingDir 'build/littlefs'
+    commandLine 'python', '-m', 'esptool',
+            '--chip', "${project.esptool_chip}",
+            '--port', findPort(),
+            '--before', "${project.esptool_before}",
+            '--after', "${project.esptool_after}",
+            'write_flash', // Write a binary blob to flash
+            '--compress',
+            '--flash_mode', "${project.esptool_flash_mode}",
+            '--flash_freq', "${project.esptool_flash_frequency}",
+            '--flash_size', "${project.esptool_flash_size}",
+            "${project.esptool_address}",
+            file("build/littlefs/data.bin")
+}
+
+task downloadArduinoCli {
+    group 'ESP'
+    // Take releases from https://github.com/arduino/arduino-cli/releases/
+    def baseUrl = "https://github.com/arduino/arduino-cli/releases/download/v1.1.1"
+    def downloadUrl = "$baseUrl/arduino-cli_1.1.1_Windows_64bit.zip"
+    def outputDir = file('build/arduino-cli')
+    def tempFile = Files.createTempFile("arduino-cli", ".zip").toFile()
+
+    outputs.dir outputDir
+
+    doLast {
+        logger.lifecycle("Downloading arduino-cli from $downloadUrl")
+        tempFile.withOutputStream { outputStream ->
+            new URL(downloadUrl).openStream().withStream { inputStream ->
+                outputStream << inputStream
+            }
+        }
+        logger.lifecycle("Downloaded arduino-cli to temporary file: ${tempFile.absolutePath}")
+
+        // Extract zip and remove extra folder
+        def tempExtractDir = Files.createTempDirectory("arduino-cli_extract").toFile()
+        ant.unzip(src: tempFile, dest: tempExtractDir)
+
+        tempExtractDir.eachFile { file ->
+            file.renameTo(new File(outputDir as File, file.name))
+        }
+        tempExtractDir.deleteDir()
+
+        logger.lifecycle("Extracted arduino-cli to directory: ${outputDir.absolutePath}")
+
+        // Cleanup temporary file
+        tempFile.delete()
+        logger.lifecycle("Deleted temporary file: ${tempFile.absolutePath}")
+    }
+}
+
+task updateIndex(type: Exec) {
+    group 'ESP'
+    dependsOn 'downloadArduinoCli'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'core', 'update-index'
+}
+
+task installEspBoard(type: Exec) {
+    group 'ESP'
+    dependsOn 'updateIndex'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'core', 'install', 'esp32:esp32@3.0.7'
+}
+
+task installAsyncTcpLibrary(type: Exec) {
+    group 'ESP'
+    dependsOn 'updateIndex'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'lib', 'install', '"AsyncTCP@1.1.4"'
+}
+
+task installArduinoJsonLibrary(type: Exec) {
+    group 'ESP'
+    dependsOn 'updateIndex'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'lib', 'install', 'ArduinoJson@7.2.1"'
+}
+
+//noinspection GroovyAssignabilityCheck
+task('installArduinoLibraries').dependsOn('installEspBoard', 'installAsyncTcpLibrary', 'installArduinoJsonLibrary')
+
+task compileCode(type: Exec) {
+    dependsOn 'installArduinoLibraries'
+    inputs.dir('src/ino/rugby')
+    outputs.dir('build/esp/rugby')
+    def fqbn = project.fqbn
+    doFirst {
+        logger.lifecycle("Compiling for FQBN ${ fqbn}")
+    }
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'compile',
+            '--fqbn', "$fqbn",
+            '--build-path', file('build/esp/rugby'),
+            file('src/ino/rugby')
+}
+
+task uploadCode(type: Exec) {
+    //noinspection GroovyAccessibility
+    description = 'Upload code to ESP32 using Arduino CLI'
+    dependsOn 'compileCode'
+    outputs.cacheIf { false }
+    mustRunAfter 'uploadFilesystem'
+
+    def port = findPort()
+    def fqbn = project.fqbn
+    doFirst {
+        logger.lifecycle("Uploading for FQBN ${ fqbn}, port=${port}")
+    }
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'upload',
+            '-p', port,
+            '--fqbn', "$fqbn",
+            '--build-path', file('build/esp/rugby')
+}
+
+// Helper method to generate a random 8-character alphanumeric password
+static def generateRandomPassword(length) {
+    def chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    return (1..length).collect { chars[(int) (Math.random() * chars.length())] }.join('')
+}
+
+task saveWifiConfig {
+    def MIN_WIFI_PASS_LENGTH = 8
+    // Define inputs during the configuration phase
+    def ssid = project.hasProperty('wifi_ssid') ? project.wifi_ssid : 'rugby'
+    def password = project.hasProperty('wifi_password') ? project.wifi_password : generateRandomPassword(MIN_WIFI_PASS_LENGTH)
+
+    // Define inputs explicitly for configuration cache support
+    //noinspection GroovyAssignabilityCheck
+    inputs.property('ssid', ssid)
+    //noinspection GroovyAssignabilityCheck
+    inputs.property('password', password)
+
+    // Define the output file as a task output
+    def wifiConfigFile = file("build/wifi_config.txt")
+    outputs.file(wifiConfigFile) // Ensure Gradle tracks this file as an output
+
+    def ssidMissing = !project.hasProperty('wifi_ssid')
+    def passwordMissing = !project.hasProperty('wifi_password')
+    doFirst {
+        // Log warnings if SSID or password is missing
+        if (ssidMissing) {
+            logger.warn("WiFi SSID is missing, using default '$ssid'.")
+        }
+        if (passwordMissing) {
+            logger.warn("WiFi password is missing, generating a random password ('$password').")
+        }
+        if (password.length() < MIN_WIFI_PASS_LENGTH) {
+            throw new GradleException("Current password length (${password.length()}) is too short! Minimum password length is $MIN_WIFI_PASS_LENGTH!")
+        }
+    }
+
+    doLast {
+        // Ensure the directory exists before writing the file
+        wifiConfigFile.parentFile.mkdirs()
+
+        // Write SSID and password to the file
+        wifiConfigFile.text = "${ssid}\n${password}\n"
+        logger.lifecycle "WiFi configuration saved to ${wifiConfigFile}"
+    }
+}
+
+@TupleConstructor
+class Port implements Serializable {
+    @SuppressWarnings('unused')
+    static final long serialVersionUID = 1L
+    private String port
+
+    @Override
+    String toString() {
+        if (port == null) {
+            throw new GradleException(
+                    "There is no `port` property! " +
+                            "Please set it in gradle.properties or pass it in parameters: -Pport=COM4.\n" +
+                            "To find port run `gradle boards` or `arduino-cli board list`")
+        }
+        return port
+    }
+}
+
+Object findPort() {
+    def port = project.hasProperty('port') ? project.port : null
+    return new Port(port: port)
+}
+
+task versionMklittlefs(type: Exec) {
+    group 'version'
+    dependsOn 'downloadMklittlefs'
+
+    commandLine file("build/mklittlefs/mklittlefs.exe"), '--version'
+}
+
+task versionPython(type: Exec) {
+    group 'version'
+    commandLine 'python', '--version'
+}
+
+task versionEsptool(type: Exec) {
+    group 'version'
+    dependsOn 'installEspTool'
+    commandLine 'python', '-m', 'esptool', 'version'
+}
+
+task versionArduino(type: Exec) {
+    group 'version'
+    dependsOn 'downloadArduinoCli'
+    commandLine file('build/arduino-cli/arduino-cli.exe'), 'version'
+}
+
+task versionOs {
+    group 'version'
+    //noinspection GroovyAccessibility
+    def os_name = Os.OS_NAME
+    //noinspection GroovyAccessibility
+    def os_arch = Os.OS_ARCH
+    //noinspection GroovyAccessibility
+    def os_version = Os.OS_VERSION
+    doLast {
+        logger.lifecycle("OS: name=${os_name}, arch=${os_arch}, version=${os_version}")
+    }
+}
+
+task version {
+    group 'version'
+    dependsOn 'versionMklittlefs', 'versionPython', 'versionEsptool', 'versionArduino', 'versionOs'
+    def version = project.version
+    doLast {
+        logger.lifecycle("App version=$version")
+    }
+}

@@ -9,8 +9,9 @@ minification {
     }
 }
 
-tasks.register('htmlMinify') {
+task htmlMinify {
     description = 'Minifies an HTML file'
+    dependsOn
 
     def inputFile = file('src/html/index.html')
     def outputFile = file('build/frontend/index.min.html')
@@ -36,6 +37,7 @@ tasks.register('htmlMinify') {
         outputFile.text = minifiedContent
     }
 }
+
 task('minify').dependsOn("jsMinify", "cssMinify", "htmlMinify")
 
 import java.util.zip.GZIPOutputStream
@@ -65,7 +67,7 @@ task gzipFrontendFiles {
                 outputFile.parentFile.mkdirs()
 
                 // Perform GZIP compression
-                logger.info "Gzipping: ${file} -> ${outputFile}"
+                logger.lifecycle "Gzipping: ${file} -> ${outputFile}"
                 file.withInputStream { inputStream ->
                     outputFile.withOutputStream { outputStream ->
                         def gzipStream = new GZIPOutputStream(outputStream)
@@ -76,6 +78,6 @@ task gzipFrontendFiles {
                 }
             }
         }
-        logger.info "Gzip compression complete! Files are in: ${outputDir}"
+        logger.lifecycle "Gzip compression complete! Files are in: ${outputDir}"
     }
 }

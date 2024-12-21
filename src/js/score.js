@@ -6,7 +6,7 @@ let awayScore = 0;
 async function initializeScoreboard() {
     try {
         const response = await fetch('/score', {
-            method: 'POST',
+            method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
 
