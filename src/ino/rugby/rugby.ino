@@ -61,8 +61,13 @@ void handleUpdateHome() {
   }
 
   if (doc.containsKey("points")) {
-    score.home += doc["points"].as<int>(); // Explicitly convert to int
-    server.send(200, "application/json", "{\"status\":\"ok\"}");
+    int points = doc["points"].as<int>();
+    if(score.home + points < 0) {
+        server.send(400, "application/json", "{\"error\":\"Cannot go below 0 points!\"}");
+        return;
+    }
+    score.home += points;
+    server.send(200, "application/json", "{\"status\":\"ok\", \"points\":" + String(score.home) + "}");
   } else {
     server.send(400, "application/json", "{\"error\":\"Missing 'points' key\"}");
   }
@@ -83,8 +88,13 @@ void handleUpdateAway() {
   }
 
   if (doc.containsKey("points")) {
-    score.away += doc["points"].as<int>(); // Explicitly convert to int
-    server.send(200, "application/json", "{\"status\":\"ok\"}");
+    int points = doc["points"].as<int>();
+    if(score.away + points < 0) {
+        server.send(400, "application/json", "{\"error\":\"Cannot go below 0 points!\"}");
+        return;
+    }
+    score.away += points;
+    server.send(200, "application/json", "{\"status\":\"ok\", \"points\":" + String(score.away) + "}");
   } else {
     server.send(400, "application/json", "{\"error\":\"Missing 'points' key\"}");
   }

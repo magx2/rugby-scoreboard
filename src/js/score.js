@@ -48,11 +48,12 @@ async function updateScore(team, points) {
         }
 
         // Update score locally
+        const data = await response.json();
         if (team === 'home') {
-            homeScore += addPoints;
+            homeScore = data.points;
             document.getElementById('home-score').innerText = homeScore;
         } else if (team === 'away') {
-            awayScore += addPoints;
+            awayScore = data.points;
             document.getElementById('away-score').innerText = awayScore;
         }
     } catch (error) {
