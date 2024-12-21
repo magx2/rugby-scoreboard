@@ -7,7 +7,7 @@ async function initializeScoreboard() {
     try {
         const response = await fetch('/score', {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
         });
 
         if (!response.ok) {
@@ -39,8 +39,8 @@ async function updateScore(team, points) {
     try {
         const response = await fetch(`/score/${team}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ points: addPoints }),
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({points: addPoints}),
         });
 
         if (!response.ok) {
@@ -49,13 +49,12 @@ async function updateScore(team, points) {
 
         // Update score locally
         const data = await response.json();
-        if (team === 'home') {
-            homeScore = data.points;
-            document.getElementById('home-score').innerText = homeScore;
-        } else if (team === 'away') {
-            awayScore = data.points;
-            document.getElementById('away-score').innerText = awayScore;
-        }
+        //update home score
+        homeScore = data.home;
+        document.getElementById('home-score').innerText = homeScore;
+        // update away score
+        awayScore = data.away;
+        document.getElementById('away-score').innerText = awayScore;
     } catch (error) {
         console.error('Failed to update score:', error);
     }

@@ -46,8 +46,8 @@ void handleJS() {
   serveGzipFile(filename, "application/javascript; charset=utf-8");
 }
 
-// Handle POST requests to "/score/home"
-void handleUpdateHome() {
+// Common function to handle score updates
+void handleUpdateScore(int& teamScore) {
   if (server.method() != HTTP_POST) {
     server.send(405, "text/plain", "Method Not Allowed");
     return;
@@ -62,42 +62,25 @@ void handleUpdateHome() {
 
   if (doc.containsKey("points")) {
     int points = doc["points"].as<int>();
-    if(score.home + points < 0) {
-        server.send(400, "application/json", "{\"error\":\"Cannot go below 0 points!\"}");
-        return;
+    if (teamScore + points < 0) {
+      server.send(400, "application/json", "{\"error\":\"Cannot go below 0 points!\"}");
+      return;
     }
-    score.home += points;
-    server.send(200, "application/json", "{\"status\":\"ok\", \"points\":" + String(score.home) + "}");
+    teamScore += points;
+    handleGetScore();
   } else {
     server.send(400, "application/json", "{\"error\":\"Missing 'points' key\"}");
   }
 }
 
-// Handle POST requests to "/score/away"
+// Handler for home team score
+void handleUpdateHome() {
+  handleUpdateScore(score.home);
+}
+
+// Handler for away team score
 void handleUpdateAway() {
-  if (server.method() != HTTP_POST) {
-    server.send(405, "text/plain", "Method Not Allowed");
-    return;
-  }
-
-  DynamicJsonDocument doc(1024);
-  DeserializationError error = deserializeJson(doc, server.arg("plain"));
-  if (error) {
-    server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
-    return;
-  }
-
-  if (doc.containsKey("points")) {
-    int points = doc["points"].as<int>();
-    if(score.away + points < 0) {
-        server.send(400, "application/json", "{\"error\":\"Cannot go below 0 points!\"}");
-        return;
-    }
-    score.away += points;
-    server.send(200, "application/json", "{\"status\":\"ok\", \"points\":" + String(score.away) + "}");
-  } else {
-    server.send(400, "application/json", "{\"error\":\"Missing 'points' key\"}");
-  }
+  handleUpdateScore(score.away);
 }
 
 // Handle GET requests to "/score"
