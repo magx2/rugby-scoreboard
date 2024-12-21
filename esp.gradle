@@ -299,3 +299,43 @@ task version {
         logger.lifecycle("App version=$version")
     }
 }
+
+task versionMklittlefs(type: Exec) {
+    dependsOn 'downloadMklittlefs'
+
+    commandLine file("build/mklittlefs/mklittlefs.exe"), '--version'
+}
+
+task versionPython(type: Exec) {
+    commandLine 'python', '--version'
+}
+
+task versionEsptool(type: Exec) {
+    commandLine 'python', '-m', 'esptool', 'version'
+}
+
+task versionArduino(type: Exec) {
+    commandLine 'arduino-cli.exe', 'version'
+}
+
+import org.apache.tools.ant.taskdefs.condition.Os
+
+task versionOs {
+    //noinspection GroovyAccessibility
+    def os_name = Os.OS_NAME
+    //noinspection GroovyAccessibility
+    def os_arch = Os.OS_ARCH
+    //noinspection GroovyAccessibility
+    def os_version = Os.OS_VERSION
+    doLast {
+        logger.lifecycle("OS: name=${os_name}, arch=${os_arch}, version=${os_version}")
+    }
+}
+
+task version {
+    dependsOn 'versionMklittlefs', 'versionPython', 'versionEsptool', 'versionArduino', 'versionOs'
+    def version = project.version
+    doLast {
+        logger.lifecycle("App version=$version")
+    }
+}
