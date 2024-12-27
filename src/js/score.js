@@ -1,9 +1,20 @@
 const toggle = document.getElementById('toggle-add-remove');
+const spinnerOverlay = document.getElementById('spinner-overlay');
 let homeScore = 0;
 let awayScore = 0;
 
+function showSpinner() {
+    spinnerOverlay.classList.add('active');
+}
+
+// Hide spinner
+function hideSpinner() {
+    spinnerOverlay.classList.remove('active');
+}
+
 // Function to initialize the scoreboard by fetching the current score
 async function initializeScoreboard() {
+    showSpinner(); // Show spinner before making the request
     try {
         const response = await fetch('/score', {
             method: 'GET',
@@ -22,10 +33,13 @@ async function initializeScoreboard() {
         // Show "?" for scores if fetching fails
         document.getElementById('home-score').innerText = '?';
         document.getElementById('away-score').innerText = '?';
+    } finally {
+        hideSpinner(); // Hide spinner after the request completes
     }
 }
 
 async function refreshScoreboard() {
+    showSpinner(); // Show spinner before making the request
     try {
         const response = await fetch('/refresh', {
             method: 'GET',
@@ -40,11 +54,14 @@ async function refreshScoreboard() {
         internalUpdate(data);
     } catch (error) {
         console.error('Failed to fetch initial score:', error);
+    } finally {
+        hideSpinner(); // Hide spinner after the request completes
     }
 }
 
 // Function to update the score dynamically
 async function updateScore(team, points) {
+    showSpinner(); // Show spinner before making the request
     // Adjust points based on toggle
     const addPoints = toggle.checked ? points : -points;
 
@@ -65,6 +82,8 @@ async function updateScore(team, points) {
         internalUpdate(data);
     } catch (error) {
         console.error('Failed to update score:', error);
+    } finally {
+        hideSpinner(); // Hide spinner after the request completes
     }
 }
 
