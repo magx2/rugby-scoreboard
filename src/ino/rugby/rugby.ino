@@ -123,6 +123,12 @@ void handleGetScore() {
   server.send(200, "application/json", jsonResponse);
 }
 
+// handle GET request to "/refresh"
+void handleRefresh() {
+    handleGetScore();
+    updateScoreLeds();
+}
+
 // Redirect unknown routes to "/"
 void handleNotFound() {
   server.sendHeader("Location", "/", true); // Redirect to "/"
@@ -179,6 +185,7 @@ void setup() {
   server.on("/score/home", HTTP_POST, handleUpdateHome);
   server.on("/score/away", HTTP_POST, handleUpdateAway);
   server.on("/score", HTTP_GET, handleGetScore);
+  server.on("/refresh", HTTP_GET, handleRefresh);
 
   // Handle unknown routes
   server.onNotFound(handleNotFound);

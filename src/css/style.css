@@ -93,3 +93,22 @@ footer {
     width: 100%;
     background-color: #f9f9f9;
 }
+/* Refresh button styling */
+.refresh {
+    margin: 20px 0;
+}
+
+.refresh button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.refresh button:hover {
+    background-color: #218838;
+}
