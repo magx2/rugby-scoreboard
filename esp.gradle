@@ -1,12 +1,11 @@
+import groovy.transform.TupleConstructor
+import org.apache.tools.ant.taskdefs.condition.Os
+
 task boards(type: Exec) {
     group 'ESP'
     dependsOn 'downloadArduinoCli'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'board', 'list'
 }
-
-
-import groovy.transform.TupleConstructor
-import org.apache.tools.ant.taskdefs.condition.Os
 
 import java.nio.file.Files
 
@@ -49,7 +48,7 @@ task downloadMklittlefs {
 task bundleFileSystem(type: Copy) {
     group 'ESP'
     dependsOn 'gzipFrontendFiles', 'saveWifiConfig'
-    from 'build/frontend-gz', 'build/wifi_config.txt'
+    from 'build/frontend-gz', 'build/wifi_config.txt', 'src/conf/config.json'
     into 'build/filesystem'
 }
 

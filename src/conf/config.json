@@ -1,0 +1,4 @@
+{
+  "led_pin": 5,
+  "num_leds": 3
+}
