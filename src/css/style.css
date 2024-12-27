@@ -154,3 +154,24 @@ footer {
     opacity: 1;
     visibility: visible;
 }
+
+/* General link style */
+a {
+    color: #007BFF; /* Default link color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Make links bold */
+    transition: color 0.3s ease, text-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* Link hover state */
+a:hover {
+    color: #0056b3; /* Darker blue on hover */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+    text-decoration: underline; /* Add underline on hover */
+}
+
+/* Link active state (when clicked) */
+a:active {
+    color: #00376d; /* Even darker blue when active */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Stronger shadow effect */
+}
