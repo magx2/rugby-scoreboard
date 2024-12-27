@@ -4,9 +4,34 @@
 #include <LittleFS.h>       // File system library for serving files
 #include <ArduinoJson.h>    // For JSON handling
 #include <uri/UriRegex.h>
+#include <Adafruit_NeoPixel.h>
 
 // Create an instance of the WebServer on port 80
 WebServer server(80);
+
+int LED_PIN     =   11;
+int NUM_LEDS    =   30;
+int COLOR_RED   = 255;
+int COLOR_GREEN =   0;
+int COLOR_BLUE  =   0;
+
+int MAX_SCORE_VALUE = 99;
+
+Adafruit_NeoPixel strip;
+int NUM_SEGMENTS = 7;
+int MASKS[]  = {
+        /* 0 */ 0b1110111,
+        /* 1 */ 0b1000100,
+        /* 2 */ 0b0111110,
+        /* 3 */ 0b1101110,
+        /* 4 */ 0b1001101,
+        /* 5 */ 0b1101011,
+        /* 6 */ 0b1111011,
+        /* 7 */ 0b1000110,
+        /* 8 */ 0b1111111,
+        /* 9 */ 0b1101111
+    };
+
 
 // Internal score state
 struct Score {
@@ -67,7 +92,11 @@ void handleUpdateScore(int& teamScore) {
       return;
     }
     teamScore += points;
+    if(teamScore > MAX_SCORE_VALUE) {
+        teamScore = MAX_SCORE_VALUE;
+    }
     handleGetScore();
+    updateScoreLeds();
   } else {
     server.send(400, "application/json", "{\"error\":\"Missing 'points' key\"}");
   }
@@ -154,6 +183,16 @@ void setup() {
   // Handle unknown routes
   server.onNotFound(handleNotFound);
 
+  if (!loadConfig()) {
+    Serial.println("Failed to load configuration, using default values.");
+  }
+
+  strip.updateType(NEO_GRB + NEO_KHZ800);
+  strip.updateLength(NUM_LEDS);
+  strip.setPin(LED_PIN);
+  strip.begin();
+  updateScoreLeds();
+
   // Start the server
   server.begin();
   Serial.println("Server started!");
@@ -161,4 +200,97 @@ void setup() {
 
 void loop() {
   server.handleClient(); // Handle incoming client requests
+}
+
+void updateScoreLeds() {
+    strip.clear();
+
+    {
+        int firstDigit = 0, secondDigit = 0;
+        getDigits(score.home, firstDigit, secondDigit);
+        setDigit(firstDigit, 3);
+        setDigit(secondDigit, 2);
+    }
+
+    {
+        int firstDigit = 0, secondDigit = 0;
+        getDigits(score.away, firstDigit, secondDigit);
+        setDigit(firstDigit, 1);
+        setDigit(secondDigit, 0);
+    }
+
+    strip.show(); // Update the strip to display the changes
+}
+
+void setDigit(int digit, int order) {
+    if (digit >= sizeof(MASKS) / sizeof(int)) return;
+    int mask = MASKS[digit];
+
+    int offset = order * NUM_SEGMENTS * NUM_LEDS;
+    int value = 1;
+    for (int idx = 0; idx < NUM_SEGMENTS; idx++) {
+        int masked = mask & value;
+        if (masked == 0) continue;
+
+        int color = strip.Color(COLOR_RED, COLOR_GREEN, COLOR_BLUE);
+        for (int jdx = 0; jdx < NUM_LEDS; jdx++) {
+            strip.setPixelColor(offset + idx * NUM_LEDS + jdx, color);
+        }
+
+        value = value << 1;
+    }
+}
+
+// Function to extract the first and second digits from an integer
+void getDigits(int number, int &firstDigit, int &secondDigit) {
+  // Extract the first digit
+  firstDigit = number;
+  while (firstDigit >= 10) {
+    firstDigit /= 10;
+  }
+
+  // Extract the second digit
+  int divisor = 1;
+  while (number / divisor >= 100) {
+    divisor *= 10;
+  }
+  secondDigit = (number / divisor) % 10;
+}
+
+// Function to load the configuration file
+bool loadConfig() {
+  File configFile = LittleFS.open("/config.json", "r");
+  if (!configFile) {
+    Serial.println("Failed to open config file.");
+    return false;
+  }
+
+  size_t size = configFile.size();
+  if (size > 1024) {
+    Serial.println("Config file size is too large.");
+    return false;
+  }
+
+  // Read file into a string
+  String configData = configFile.readString();
+  configFile.close();
+
+  // Parse JSON
+  StaticJsonDocument<256> jsonDoc;
+  DeserializationError error = deserializeJson(jsonDoc, configData);
+
+  if (error) {
+    Serial.println("Failed to parse config file.");
+    return false;
+  }
+
+  // Load values
+  LED_PIN = jsonDoc["led_pin"] | LED_PIN;  // Use default if not found
+  NUM_LEDS = jsonDoc["num_leds"] | NUM_LEDS;  // Use default if not found
+  COLOR_RED = jsonDoc["color_red"] | COLOR_RED;  // Use default if not found
+  COLOR_GREEN = jsonDoc["color_green"] | COLOR_GREEN;  // Use default if not found
+  COLOR_BLUE = jsonDoc["color_blue"] | COLOR_BLUE;  // Use default if not found
+
+  Serial.printf("Config loaded: LED_PIN=%d, NUM_LEDS=%d\n", LED_PIN, NUM_LEDS);
+  return true;
 }
