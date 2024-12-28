@@ -4,7 +4,7 @@
 #include <LittleFS.h>       // File system library for serving files
 #include <ArduinoJson.h>    // For JSON handling
 #include <uri/UriRegex.h>
-#include <Adafruit_NeoPixel.h>
+// #include <Adafruit_NeoPixel.h>
 
 // Create an instance of the WebServer on port 80
 WebServer server(80);
@@ -17,7 +17,7 @@ int COLOR_BLUE  =   0;
 
 int MAX_SCORE_VALUE = 99;
 
-Adafruit_NeoPixel strip;
+// Adafruit_NeoPixel strip;
 int NUM_SEGMENTS = 7;
 int MASKS[]  = {
         /* 0 */ 0b1110111,
@@ -262,11 +262,11 @@ void setup() {
     Serial.println("Failed to load configuration, using default values.");
   }
 
-  strip.updateType(NEO_GRB + NEO_KHZ800);
-  strip.updateLength(NUM_LEDS);
-  strip.setPin(LED_PIN);
-  strip.begin();
-  updateScoreLeds();
+//   strip.updateType(NEO_GRB + NEO_KHZ800);
+//   strip.updateLength(NUM_LEDS);
+//   strip.setPin(LED_PIN);
+//   strip.begin();
+//   updateScoreLeds();
 
   // Start the server
   server.begin();
@@ -278,7 +278,7 @@ void loop() {
 }
 
 void updateScoreLeds() {
-    strip.clear();
+//     strip.clear();
 
     {
         int firstDigit = 0, secondDigit = 0;
@@ -294,7 +294,7 @@ void updateScoreLeds() {
         setDigit(secondDigit, 0);
     }
 
-    strip.show(); // Update the strip to display the changes
+//     strip.show(); // Update the strip to display the changes
 }
 
 void setDigit(int digit, int order) {
@@ -307,10 +307,10 @@ void setDigit(int digit, int order) {
         int masked = mask & value;
         if (masked == 0) continue;
 
-        int color = strip.Color(COLOR_RED, COLOR_GREEN, COLOR_BLUE);
-        for (int jdx = 0; jdx < NUM_LEDS; jdx++) {
-            strip.setPixelColor(offset + idx * NUM_LEDS + jdx, color);
-        }
+//         int color = strip.Color(COLOR_RED, COLOR_GREEN, COLOR_BLUE);
+//         for (int jdx = 0; jdx < NUM_LEDS; jdx++) {
+//             strip.setPixelColor(offset + idx * NUM_LEDS + jdx, color);
+//         }
 
         value = value << 1;
     }
