@@ -175,3 +175,11 @@ a:active {
     color: #00376d; /* Even darker blue when active */
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Stronger shadow effect */
 }
+
+/* Divider between sections */
+.divider {
+    height: 2px;
+    background-color: #ddd; /* Light gray color */
+    margin: 20px 0; /* Add some spacing around the divider */
+    border: none;
+}

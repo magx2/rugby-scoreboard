@@ -39,6 +39,11 @@ struct Score {
   int away = 0;
 } score;
 
+// Timer variables
+uint ONE_MINUTE = 60000;
+unsigned long startTime = 0;
+bool isRunning = false;
+
 // Wi-Fi AP credentials
 String ssid;
 String password;
@@ -129,6 +134,64 @@ void handleRefresh() {
     updateScoreLeds();
 }
 
+// handle POST request to "/time/start"
+void handleTimeStart() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, server.arg("plain"));
+    if (error) {
+        server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+        return;
+    }
+
+    int startFrom = doc["startFrom"].as<int>();
+    if (startFrom < 1) {
+        server.send(400, "application/json", "{\"error\":\"Start from cannot be lower than 1!\"}");
+        return;
+    }
+
+    isRunning = true;
+    startTime = millis() - (startFrom * ONE_MINUTE);
+    handleTimeStatus();
+}
+
+// handle POST request to "/time/pause"
+void handleTimePause() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+    isRunning = false;
+    handleTimeStatus();
+}
+
+// handle POST request to "/time/stop"
+void handleTimeStop() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+    isRunning = false;
+    startTime = 0;
+    handleTimeStatus();
+}
+
+// handle GET request to "/time/status"
+void handleTimeStatus() {
+  DynamicJsonDocument doc(256);
+  if(isRunning) {
+    doc["elapsedMins"] = ((millis() - startTime + ONE_MINUTE) / ONE_MINUTE);
+  }
+  doc["isRunning"] = isRunning;
+  String jsonResponse;
+  serializeJson(doc, jsonResponse);
+  server.send(200, "application/json", jsonResponse);
+}
+
 // Redirect unknown routes to "/"
 void handleNotFound() {
   server.sendHeader("Location", "/", true); // Redirect to "/"
@@ -186,6 +249,11 @@ void setup() {
   server.on("/score/away", HTTP_POST, handleUpdateAway);
   server.on("/score", HTTP_GET, handleGetScore);
   server.on("/refresh", HTTP_GET, handleRefresh);
+  // time endpoints
+  server.on("/time/start", HTTP_POST, handleTimeStart);
+  server.on("/time/pause", HTTP_POST, handleTimePause);
+  server.on("/time/stop", HTTP_POST, handleTimeStop);
+  server.on("/time/status", HTTP_GET, handleTimeStatus);
 
   // Handle unknown routes
   server.onNotFound(handleNotFound);
