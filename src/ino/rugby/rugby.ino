@@ -215,14 +215,14 @@ void updateScoreLeds() {
     {
         int firstDigit = 0, secondDigit = 0;
         getDigits(score.home, firstDigit, secondDigit);
-        setDigit(firstDigit, 3);
+        if(firstDigit != 0) setDigit(firstDigit, 3);
         setDigit(secondDigit, 2);
     }
 
     {
         int firstDigit = 0, secondDigit = 0;
         getDigits(score.away, firstDigit, secondDigit);
-        setDigit(firstDigit, 1);
+        if(firstDigit != 0) setDigit(firstDigit, 1);
         setDigit(secondDigit, 0);
     }
 
