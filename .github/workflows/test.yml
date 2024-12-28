@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - '**' # Run on all branches
+  pull_request:
+    branches:
+      - '**' # Run on pull requests targeting any branch
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Java environment
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17' # Change this to match your project's Java version
+          distribution: 'temurin'
+
+      # Step 3: Run the Gradle task
+      - name: Run Gradle Compile
+        run: ./gradlew compileCode
