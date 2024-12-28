@@ -3,6 +3,7 @@ plugins {
     id("org.gradlewebtools.minify") version "2.1.1"
 }
 
+idea.module.sourceDirs += file("src/conf")
 idea.module.sourceDirs += file("src/css")
 idea.module.sourceDirs += file("src/html")
 idea.module.sourceDirs += file("src/ino")

@@ -93,3 +93,85 @@ footer {
     width: 100%;
     background-color: #f9f9f9;
 }
+/* Refresh button styling */
+.refresh {
+    margin: 20px 0;
+}
+
+.refresh button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #28a745;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.refresh button:hover {
+    background-color: #218838;
+}
+
+/* Spinner Overlay */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    /* Initial state for transitions */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Spinner */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Visible state for spinner-overlay */
+.spinner-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* General link style */
+a {
+    color: #007BFF; /* Default link color */
+    text-decoration: none; /* Remove underline */
+    font-weight: bold; /* Make links bold */
+    transition: color 0.3s ease, text-shadow 0.3s ease; /* Smooth transition */
+}
+
+/* Link hover state */
+a:hover {
+    color: #0056b3; /* Darker blue on hover */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); /* Subtle shadow effect */
+    text-decoration: underline; /* Add underline on hover */
+}
+
+/* Link active state (when clicked) */
+a:active {
+    color: #00376d; /* Even darker blue when active */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Stronger shadow effect */
+}

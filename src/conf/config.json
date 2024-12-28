@@ -1,0 +1,7 @@
+{
+  "led_pin": 11,
+  "num_leds": 30,
+  "color_red": 255,
+  "color_green": 0,
+  "color_blue": 0
+}
