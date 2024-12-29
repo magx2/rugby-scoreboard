@@ -13,14 +13,14 @@ async function startTimerRequest(startFrom) {
 }
 
 async function stopTimerRequest() {
-    return await fetch('/time/stop', {
+    return await xfetch('/time/stop', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
     });
 }
 
 async function statusRequest() {
-    return await fetch('/time/status');
+    return await xfetch('/time/status');
 }
 
 // Finite State Machine Implementation
@@ -158,8 +158,8 @@ fsm.onStateEnter("play", () => {
         });
 
     // buttons
-    document.getElementById('toggle-play-pause').innerText = '⏸️ Pause';
-    document.getElementById("stop-button").innerText = '⏹️️ Stop';
+    document.getElementById('toggle-play-pause').innerHTML = '⏸️&nbsp;Pause';
+    document.getElementById("stop-button").innerHTML = '⏹️️&nbsp;Stop';
     document.getElementById("time-picker").disabled = true;
     document.getElementById("first-half").disabled = true;
     document.getElementById("second-half").disabled = true;
@@ -191,8 +191,8 @@ fsm.onStateEnter("stop", () => {
     document.getElementById('progress-bar').style.width = '0%';
 
     // buttons
-    document.getElementById('toggle-play-pause').innerText = '▶️ Play';
-    document.getElementById("stop-button").innerText = '⏹️️ Reset';
+    document.getElementById('toggle-play-pause').innerHTML = '▶️&nbsp;Play';
+    document.getElementById("stop-button").innerHTML = '⏹️️&nbsp;Reset';
     document.getElementById("time-picker").disabled = false;
     document.getElementById("first-half").disabled = false;
     document.getElementById("second-half").disabled = false;

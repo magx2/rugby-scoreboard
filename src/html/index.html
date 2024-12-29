@@ -43,6 +43,14 @@
         </label>
     </div>
 
+    <div class="toggle">
+        <label>
+            <button onclick="cleanScore()" id="clean-score">
+                Clean Score
+            </button>
+        </label>
+    </div>
+
     <div class="divider"></div>
 
     <h1>Timer</h1>
@@ -52,16 +60,16 @@
             <div id="progress-bar"></div>
         </div>
         <div class="timer-controls">
-            <button id="toggle-play-pause" onclick="togglePlayPause()">▶️ Play</button>
-            <button id='stop-button' onclick="stopTimer()">⏹️ Reset</button>
+            <button id="toggle-play-pause" onclick="togglePlayPause()">▶️&nbsp;Play</button>
+            <button id='stop-button' onclick="stopTimer()">⏹️&nbsp;Reset</button>
         </div>
         <div class="time-picker">
             <label for="time-picker">Start from:</label>
             <input type="number" pattern="\d*" id="time-picker" value="1" min="1"/>
         </div>
         <div class="time-halves">
-            <button id="first-half" onclick="setStartFrom(1)">First Half</button>
-            <button id="second-half" onclick="setStartFrom(40)">Second Half</button>
+            <button id="first-half" onclick="setStartFrom(1)">First&nbsp;Half</button>
+            <button id="second-half" onclick="setStartFrom(40)">Second&nbsp;Half</button>
         </div>
     </div>
 </div>

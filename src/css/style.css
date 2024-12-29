@@ -54,24 +54,6 @@ h1 {
     color: #000;
 }
 
-.controls button {
-    display: block;
-    width: 100%;
-    margin: 5px 0;
-    padding: 10px;
-    font-size: 1em;
-    color: #fff;
-    background-color: #007BFF;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.controls button:hover {
-    background-color: #0056b3;
-}
-
 /* Toggle Add/Remove Points */
 .toggle {
     margin-top: 20px;
