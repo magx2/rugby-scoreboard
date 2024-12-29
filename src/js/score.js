@@ -37,5 +37,16 @@ function internalUpdate(data) {
     document.getElementById('away-score').innerText = awayScore;
 }
 
+async function cleanScore() {
+    const data = await xfetch(`/score/clean`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+    });
+
+    if (data) {
+        internalUpdate(data);
+    }
+}
+
 // Initialize the scoreboard when the page loads
 document.addEventListener('DOMContentLoaded', initializeScoreboard);

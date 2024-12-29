@@ -123,6 +123,12 @@ void handleUpdateAway() {
   handleUpdateScore(score.away);
 }
 
+void handleCleanScore() {
+    score.home = 0;
+    score.away = 0;
+    handleGetScore();
+}
+
 // Handle GET requests to "/score"
 void handleGetScore() {
   DynamicJsonDocument doc(256);
@@ -243,6 +249,7 @@ void setup() {
   server.on(UriRegex("^\\/([a-zA-Z0-9_.-]+)\\.js"), HTTP_GET, handleJS);
   server.on("/score/home", HTTP_POST, handleUpdateHome);
   server.on("/score/away", HTTP_POST, handleUpdateAway);
+  server.on("/score/clean", HTTP_POST, handleCleanScore);
   server.on("/score", HTTP_GET, handleGetScore);
   server.on("/refresh", HTTP_GET, handleRefresh);
   // time endpoints

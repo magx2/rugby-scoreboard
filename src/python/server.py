@@ -59,6 +59,13 @@ def get_score():
     return jsonify(score), 200
 
 
+@app.route("/score/clean", methods=["POST"])
+def clean():
+    score["home"] = 0;
+    score["away"] = 0;
+    return jsonify(score), 200
+
+
 @app.route("/refresh", methods=["GET"])
 def refresh():
     global score

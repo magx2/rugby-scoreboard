@@ -73,13 +73,8 @@
 }
 
 .time-picker button {
-    padding: 5px 10px;
-    font-size: 1rem;
     background-color: #007BFF;
     color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
@@ -97,13 +92,8 @@
 }
 
 .time-halves button {
-    padding: 5px 10px;
-    font-size: 1rem;
     background-color: #28a745; /* A green color for variety */
     color: #fff;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
