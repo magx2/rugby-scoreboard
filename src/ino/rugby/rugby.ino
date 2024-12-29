@@ -9,11 +9,17 @@
 // Create an instance of the WebServer on port 80
 WebServer server(80);
 
-int LED_PIN     =   11;
-int NUM_LEDS    =   30;
-int COLOR_RED   = 255;
-int COLOR_GREEN =   0;
-int COLOR_BLUE  =   0;
+int LED_PIN      =  11;
+int NUM_LEDS     =  30;
+int COLOR_RED    = 255;
+int COLOR_GREEN  =  0;
+int COLOR_BLUE   =  0;
+
+int TIME_LED_PIN      =  12;
+int TIME_NUM_LEDS     =  30;
+int TIME_COLOR_RED    = 255;
+int TIME_COLOR_GREEN  =  0;
+int TIME_COLOR_BLUE   =  0;
 
 int MAX_SCORE_VALUE = 99;
 
@@ -354,6 +360,19 @@ bool loadConfig() {
   COLOR_RED = jsonDoc["color_red"] | COLOR_RED;  // Use default if not found
   COLOR_GREEN = jsonDoc["color_green"] | COLOR_GREEN;  // Use default if not found
   COLOR_BLUE = jsonDoc["color_blue"] | COLOR_BLUE;  // Use default if not found
+
+  // Load time values
+  // Check if the "time" object exists
+  if (jsonDoc.containsKey("time")) {
+    JsonObject timeObject = jsonDoc["time"].as<JsonObject>();
+
+    // Load time-specific values
+    TIME_LED_PIN = timeObject["led_pin"] | TIME_LED_PIN;  // Use default if not found
+    TIME_NUM_LEDS = timeObject["num_leds"] | TIME_NUM_LEDS;  // Use default if not found
+    TIME_COLOR_RED = timeObject["color_red"] | TIME_COLOR_RED;  // Use default if not found
+    TIME_COLOR_GREEN = timeObject["color_green"] | TIME_COLOR_GREEN;  // Use default if not found
+    TIME_COLOR_BLUE = timeObject["color_blue"] | TIME_COLOR_BLUE;  // Use default if not found
+  }
 
   Serial.printf("Config loaded: LED_PIN=%d, NUM_LEDS=%d\n", LED_PIN, NUM_LEDS);
   return true;
