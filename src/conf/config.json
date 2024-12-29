@@ -3,5 +3,12 @@
   "num_leds": 30,
   "color_red": 255,
   "color_green": 0,
-  "color_blue": 0
+  "color_blue": 0,
+  "time": {
+    "led_pin": 12,
+    "num_leds": 30,
+    "color_red": 255,
+    "color_green": 0,
+    "color_blue": 0
+  }
 }

@@ -8,6 +8,7 @@ task boards(type: Exec) {
 }
 
 import java.nio.file.Files
+import java.time.ZonedDateTime
 
 task downloadMklittlefs {
     group 'ESP'
@@ -73,6 +74,12 @@ task createFilesystem(type: Exec) {
 task installEspTool(type: Exec) {
     group 'ESP'
     commandLine 'pip', 'install', 'esptool==4.8.1'
+    def output = file('build/installs/esptool.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed ESP Tool at ${ZonedDateTime.now()}"
+    }
 }
 
 task uploadFilesystem(type: Exec) {
@@ -134,30 +141,60 @@ task updateIndex(type: Exec) {
     group 'ESP'
     dependsOn 'downloadArduinoCli'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'core', 'update-index'
+    def output = file('build/installs/index.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Updated Arduino index at ${ZonedDateTime.now()}"
+    }
 }
 
 task installEspBoard(type: Exec) {
     group 'ESP'
     dependsOn 'updateIndex'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'core', 'install', 'esp32:esp32@3.0.7'
+    def output = file('build/installs/ESPBoard.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed ESP Board library at ${ZonedDateTime.now()}"
+    }
 }
 
 task installAsyncTcpLibrary(type: Exec) {
     group 'ESP'
     dependsOn 'updateIndex'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'lib', 'install', '"AsyncTCP@1.1.4"'
+    def output = file('build/installs/AsyncTcpLibrary.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed AsyncTcp library at ${ZonedDateTime.now()}"
+    }
 }
 
 task installArduinoJsonLibrary(type: Exec) {
     group 'ESP'
     dependsOn 'updateIndex'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'lib', 'install', 'ArduinoJson@7.2.1"'
+    def output = file('build/installs/JsonLibrary.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed Json library at ${ZonedDateTime.now()}"
+    }
 }
 
 task installArduinoNeoPixelLibrary(type: Exec) {
     group 'ESP'
     dependsOn 'updateIndex'
     commandLine file('build/arduino-cli/arduino-cli.exe'), 'lib', 'install', '"Adafruit NeoPixel@1.12.3"'
+    def output = file('build/installs/NeoPixelLibrary.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed NeoPixel library at ${ZonedDateTime.now()}"
+    }
 }
 
 //noinspection GroovyAssignabilityCheck

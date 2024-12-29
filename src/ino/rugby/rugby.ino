@@ -4,20 +4,26 @@
 #include <LittleFS.h>       // File system library for serving files
 #include <ArduinoJson.h>    // For JSON handling
 #include <uri/UriRegex.h>
-#include <Adafruit_NeoPixel.h>
+// #include <Adafruit_NeoPixel.h>
 
 // Create an instance of the WebServer on port 80
 WebServer server(80);
 
-int LED_PIN     =   11;
-int NUM_LEDS    =   30;
-int COLOR_RED   = 255;
-int COLOR_GREEN =   0;
-int COLOR_BLUE  =   0;
+int LED_PIN      =  11;
+int NUM_LEDS     =  30;
+int COLOR_RED    = 255;
+int COLOR_GREEN  =  0;
+int COLOR_BLUE   =  0;
+
+int TIME_LED_PIN      =  12;
+int TIME_NUM_LEDS     =  30;
+int TIME_COLOR_RED    = 255;
+int TIME_COLOR_GREEN  =  0;
+int TIME_COLOR_BLUE   =  0;
 
 int MAX_SCORE_VALUE = 99;
 
-Adafruit_NeoPixel strip;
+// Adafruit_NeoPixel strip;
 int NUM_SEGMENTS = 7;
 int MASKS[]  = {
         /* 0 */ 0b1110111,
@@ -38,6 +44,11 @@ struct Score {
   int home = 0;
   int away = 0;
 } score;
+
+// Timer variables
+uint ONE_MINUTE = 60000;
+unsigned long startTime = 0;
+bool isRunning = false;
 
 // Wi-Fi AP credentials
 String ssid;
@@ -129,6 +140,54 @@ void handleRefresh() {
     updateScoreLeds();
 }
 
+// handle POST request to "/time/start"
+void handleTimeStart() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+
+    DynamicJsonDocument doc(1024);
+    DeserializationError error = deserializeJson(doc, server.arg("plain"));
+    if (error) {
+        server.send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+        return;
+    }
+
+    int startFrom = doc["startFrom"].as<int>();
+    if (startFrom < 0) {
+        server.send(400, "application/json", "{\"error\":\"Start from cannot be lower than 0!\"}");
+        return;
+    }
+
+    isRunning = true;
+    startTime = millis() - (startFrom * ONE_MINUTE);
+    handleTimeStatus();
+}
+
+// handle POST request to "/time/stop"
+void handleTimeStop() {
+    if (server.method() != HTTP_POST) {
+        server.send(405, "text/plain", "Method Not Allowed");
+        return;
+    }
+    isRunning = false;
+    startTime = 0;
+    handleTimeStatus();
+}
+
+// handle GET request to "/time/status"
+void handleTimeStatus() {
+  DynamicJsonDocument doc(256);
+  if(isRunning) {
+    doc["elapsedMins"] = ((millis() - startTime + ONE_MINUTE) / ONE_MINUTE);
+  }
+  doc["isRunning"] = isRunning;
+  String jsonResponse;
+  serializeJson(doc, jsonResponse);
+  server.send(200, "application/json", jsonResponse);
+}
+
 // Redirect unknown routes to "/"
 void handleNotFound() {
   server.sendHeader("Location", "/", true); // Redirect to "/"
@@ -186,6 +245,10 @@ void setup() {
   server.on("/score/away", HTTP_POST, handleUpdateAway);
   server.on("/score", HTTP_GET, handleGetScore);
   server.on("/refresh", HTTP_GET, handleRefresh);
+  // time endpoints
+  server.on("/time/start", HTTP_POST, handleTimeStart);
+  server.on("/time/stop", HTTP_POST, handleTimeStop);
+  server.on("/time/status", HTTP_GET, handleTimeStatus);
 
   // Handle unknown routes
   server.onNotFound(handleNotFound);
@@ -194,11 +257,11 @@ void setup() {
     Serial.println("Failed to load configuration, using default values.");
   }
 
-  strip.updateType(NEO_GRB + NEO_KHZ800);
-  strip.updateLength(NUM_LEDS);
-  strip.setPin(LED_PIN);
-  strip.begin();
-  updateScoreLeds();
+//   strip.updateType(NEO_GRB + NEO_KHZ800);
+//   strip.updateLength(NUM_LEDS);
+//   strip.setPin(LED_PIN);
+//   strip.begin();
+//   updateScoreLeds();
 
   // Start the server
   server.begin();
@@ -210,7 +273,7 @@ void loop() {
 }
 
 void updateScoreLeds() {
-    strip.clear();
+//     strip.clear();
 
     {
         int firstDigit = 0, secondDigit = 0;
@@ -226,7 +289,7 @@ void updateScoreLeds() {
         setDigit(secondDigit, 0);
     }
 
-    strip.show(); // Update the strip to display the changes
+//     strip.show(); // Update the strip to display the changes
 }
 
 void setDigit(int digit, int order) {
@@ -239,10 +302,10 @@ void setDigit(int digit, int order) {
         int masked = mask & value;
         if (masked == 0) continue;
 
-        int color = strip.Color(COLOR_RED, COLOR_GREEN, COLOR_BLUE);
-        for (int jdx = 0; jdx < NUM_LEDS; jdx++) {
-            strip.setPixelColor(offset + idx * NUM_LEDS + jdx, color);
-        }
+//         int color = strip.Color(COLOR_RED, COLOR_GREEN, COLOR_BLUE);
+//         for (int jdx = 0; jdx < NUM_LEDS; jdx++) {
+//             strip.setPixelColor(offset + idx * NUM_LEDS + jdx, color);
+//         }
 
         value = value << 1;
     }
@@ -297,6 +360,19 @@ bool loadConfig() {
   COLOR_RED = jsonDoc["color_red"] | COLOR_RED;  // Use default if not found
   COLOR_GREEN = jsonDoc["color_green"] | COLOR_GREEN;  // Use default if not found
   COLOR_BLUE = jsonDoc["color_blue"] | COLOR_BLUE;  // Use default if not found
+
+  // Load time values
+  // Check if the "time" object exists
+  if (jsonDoc.containsKey("time")) {
+    JsonObject timeObject = jsonDoc["time"].as<JsonObject>();
+
+    // Load time-specific values
+    TIME_LED_PIN = timeObject["led_pin"] | TIME_LED_PIN;  // Use default if not found
+    TIME_NUM_LEDS = timeObject["num_leds"] | TIME_NUM_LEDS;  // Use default if not found
+    TIME_COLOR_RED = timeObject["color_red"] | TIME_COLOR_RED;  // Use default if not found
+    TIME_COLOR_GREEN = timeObject["color_green"] | TIME_COLOR_GREEN;  // Use default if not found
+    TIME_COLOR_BLUE = timeObject["color_blue"] | TIME_COLOR_BLUE;  // Use default if not found
+  }
 
   Serial.printf("Config loaded: LED_PIN=%d, NUM_LEDS=%d\n", LED_PIN, NUM_LEDS);
   return true;

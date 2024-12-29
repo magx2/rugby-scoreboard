@@ -8,9 +8,11 @@ idea.module.sourceDirs += file("src/css")
 idea.module.sourceDirs += file("src/html")
 idea.module.sourceDirs += file("src/ino")
 idea.module.sourceDirs += file("src/js")
+idea.module.sourceDirs += file("src/python")
 
 apply from: 'frontend.gradle'
 apply from: 'esp.gradle'
+apply from: 'server.gradle'
 
 tasks.register('clean', Delete) {
     description = 'Removes the build folder'

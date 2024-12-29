@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scoreboard</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/timer.css">
 </head>
 <body>
 <div class="container">
@@ -41,9 +42,26 @@
         </label>
     </div>
 
-    <!-- Refresh Button -->
-    <div class="refresh">
-        <button onclick="refreshScoreboard()">Refresh</button>
+    <div class="divider"></div>
+
+    <h1>Timer</h1>
+    <div class="timer-container">
+        <span id="timer-display">??</span>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div class="timer-controls">
+            <button id="toggle-play-pause" onclick="togglePlayPause()">▶️ Play</button>
+            <button id='stop-button' onclick="stopTimer()">⏹️ Reset</button>
+        </div>
+        <div class="time-picker">
+            <label for="time-picker">Start from:</label>
+            <input type="number" pattern="\d*" id="time-picker" value="1" min="1"/>
+        </div>
+        <div class="time-halves">
+            <button id="first-half" onclick="setStartFrom(1)">First Half</button>
+            <button id="second-half" onclick="setStartFrom(40)">Second Half</button>
+        </div>
     </div>
 </div>
 
@@ -53,9 +71,11 @@
 </div>
 
 <footer>
-    <p id="footer-text">Version: {version} | Upload Date: {uploadDate} | <a href="https://grzeslowski.pl" target="_blank">grzeslowski.pl</a></p>
+    <p id="footer-text">Version: {version} | Upload Date: {uploadDate} | <a href="https://grzeslowski.pl"
+                                                                            target="_blank">grzeslowski.pl</a></p>
 </footer>
 
-<script src="score.js"></script>
+<script src="/score.js"></script>
+<script src="/timer.js"></script>
 </body>
 </html>

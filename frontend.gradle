@@ -69,6 +69,11 @@ task gzipFrontendFiles {
         // Ensure output directory exists
         outputDir.mkdirs()
 
+        long totalOriginalSize = 0
+        long totalCompressedSize = 0
+
+        def fileStats = []
+
         inputDir.eachFileRecurse { file ->
             if (file.isFile()) {
                 // Define output .gz file path
@@ -79,7 +84,6 @@ task gzipFrontendFiles {
                 outputFile.parentFile.mkdirs()
 
                 // Perform GZIP compression
-                logger.lifecycle "Gzipping: ${file} -> ${outputFile}"
                 file.withInputStream { inputStream ->
                     outputFile.withOutputStream { outputStream ->
                         def gzipStream = new GZIPOutputStream(outputStream)
@@ -88,8 +92,44 @@ task gzipFrontendFiles {
                         }
                     }
                 }
+
+                // Calculate file sizes
+                long originalSize = file.length()
+                long compressedSize = outputFile.length()
+
+                totalOriginalSize += originalSize
+                totalCompressedSize += compressedSize
+
+                // Add to statistics list
+                fileStats << [
+                        name       : file.name,
+                        original   : originalSize,
+                        compressed : compressedSize,
+                        compression: (int) ((100 - (compressedSize * 100 / originalSize)))
+                ]
             }
         }
-        logger.lifecycle "Gzip compression complete! Files are in: ${outputDir}"
+
+        // Print statistics in a pretty table
+        def tableHeader = String.format("%-30s | %-15s | %-15s | %-15s", "File", "Original Size", "Compressed Size", "Compression")
+        def separator = "-" * tableHeader.length()
+        logger.lifecycle separator
+        logger.lifecycle tableHeader
+        logger.lifecycle separator
+
+        fileStats.each { stats ->
+            logger.lifecycle String.format(
+                    "%-30s | %,9d bytes | %,9d bytes | %14d%%",
+                    stats.name, stats.original, stats.compressed, stats.compression
+            )
+        }
+
+        logger.lifecycle separator
+        logger.lifecycle String.format(
+                "%-30s | %,9d bytes | %,9d bytes | %14d%%",
+                "Total", totalOriginalSize, totalCompressedSize,
+                (int) ((100 - (totalCompressedSize * 100 / totalOriginalSize)))
+        )
+        logger.lifecycle separator
     }
 }

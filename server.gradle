@@ -1,0 +1,19 @@
+import java.time.ZonedDateTime
+
+task installFlask(type: Exec) {
+    group 'Server'
+    commandLine 'pip', 'install', 'flask==3.1.0'
+    def output = file('build/installs/flask.txt')
+    outputs.file output
+    doLast {
+        output.parentFile.mkdirs()
+        output.text = "Installed Flask Tool at ${ZonedDateTime.now()}"
+    }
+}
+
+task startServer(type: Exec) {
+    group 'Server'
+    dependsOn 'installFlask'
+    workingDir file('src/python')
+    commandLine 'python', 'server.py'
+}
