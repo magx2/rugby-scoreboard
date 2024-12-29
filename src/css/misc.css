@@ -1,0 +1,38 @@
+/* General Notification Styles */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.notification.show {
+    opacity: 1;
+}
+
+/* Notification Types */
+.notification.info {
+    background-color: #333;
+    color: white;
+}
+
+.notification.warn {
+    background-color: #ffcc00;
+    color: #333;
+    font-weight: bold;
+}
+
+.notification.error {
+    background-color: #ff3333;
+    color: white;
+    font-weight: bold;
+}

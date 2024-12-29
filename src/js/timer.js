@@ -5,40 +5,22 @@ async function startTimerRequest(startFrom) {
     if (typeof startFrom !== 'number') {
         startFrom = 1;
     }
-    const response = await fetch('/time/start', {
+    return await xfetch('/time/start', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({startFrom: startFrom - 1})
     });
-    if (!response.ok) {
-        throw new Error(`Failed to start timer: ${response.statusText}`);
-    }
-    return await response.json();
 }
 
 async function stopTimerRequest() {
-    const response = await fetch('/time/stop', {
+    return await fetch('/time/stop', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
-        // body: ...
     });
-    if (!response.ok) {
-        throw new Error(`Failed to stop timer: ${response.statusText}`);
-    }
-    return await response.json();
 }
 
 async function statusRequest() {
-    try {
-        // Send a GET request to retrieve current time status
-        const response = await fetch('/time/status');
-        if (!response.ok) {
-            throw new Error(`Failed to retrieve time status: ${response.statusText}`);
-        }
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-    }
+    return await fetch('/time/status');
 }
 
 // Finite State Machine Implementation

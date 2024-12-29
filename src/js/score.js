@@ -1,68 +1,30 @@
 const toggle = document.getElementById('toggle-add-remove');
-const spinnerOverlay = document.getElementById('spinner-overlay');
 let homeScore = 0;
 let awayScore = 0;
 
-function showSpinner() {
-    spinnerOverlay.classList.add('active');
-}
-
-// Hide spinner
-function hideSpinner() {
-    spinnerOverlay.classList.remove('active');
-}
-
 // Function to initialize the scoreboard by fetching the current score
 async function initializeScoreboard() {
-    showSpinner(); // Show spinner before making the request
-    try {
-        const response = await fetch('/score', {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'},
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
+    const data = await xfetch('/score', {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json'},
+    });
+    if (data) {
         internalUpdate(data);
-    } catch (error) {
-        console.error('Failed to fetch initial score:', error);
-
-        // Show "?" for scores if fetching fails
-        document.getElementById('home-score').innerText = '?';
-        document.getElementById('away-score').innerText = '?';
-    } finally {
-        hideSpinner(); // Hide spinner after the request completes
     }
 }
 
 // Function to update the score dynamically
 async function updateScore(team, points) {
-    showSpinner(); // Show spinner before making the request
     // Adjust points based on toggle
     const addPoints = toggle.checked ? points : -points;
+    const data = await xfetch(`/score/${team}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({points: addPoints}),
+    });
 
-    // Send request to REST endpoint
-    try {
-        const response = await fetch(`/score/${team}`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({points: addPoints}),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-        }
-
-        // Update score locally
-        const data = await response.json();
+    if (data) {
         internalUpdate(data);
-    } catch (error) {
-        console.error('Failed to update score:', error);
-    } finally {
-        hideSpinner(); // Hide spinner after the request completes
     }
 }
 

@@ -6,6 +6,7 @@
     <title>Scoreboard</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="/timer.css">
+    <link rel="stylesheet" href="/misc.css">
 </head>
 <body>
 <div class="container">
@@ -65,16 +66,27 @@
     </div>
 </div>
 
+<!-- Notification Container -->
+<div class="notification-container" id="notification-container"></div>
+
 <!-- Spinner Overlay -->
 <div id="spinner-overlay" class="spinner-overlay">
     <div class="spinner"></div>
 </div>
 
 <footer>
-    <p id="footer-text">Version: {version} | Upload Date: {uploadDate} | <a href="https://grzeslowski.pl"
-                                                                            target="_blank">grzeslowski.pl</a></p>
+    <div>
+        <p>Version: {version}</p>
+    </div>
+    <div>
+        <p>Upload Date: {uploadDate}</p>
+    </div>
+    <div>
+        <a href="https://grzeslowski.pl" target="_blank">grzeslowski.pl</a>
+    </div>
 </footer>
 
+<script src="/misc.js"></script>
 <script src="/score.js"></script>
 <script src="/timer.js"></script>
 </body>
