@@ -13,14 +13,14 @@ async function startTimerRequest(startFrom) {
 }
 
 async function stopTimerRequest() {
-    return await fetch('/time/stop', {
+    return await xfetch('/time/stop', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'}
     });
 }
 
 async function statusRequest() {
-    return await fetch('/time/status');
+    return await xfetch('/time/status');
 }
 
 // Finite State Machine Implementation
