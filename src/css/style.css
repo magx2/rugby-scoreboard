@@ -84,15 +84,36 @@ h1 {
 
 /* Footer Styles */
 footer {
-    margin-top: auto; /* Pushes footer to the bottom */
-    font-size: 0.9em;
-    color: #777;
-    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
-    text-align: center;
-    width: 100%;
-    background-color: #f9f9f9;
+    background-color: #f1f1f1;
+    border-top: 1px solid #ccc;
 }
+
+footer div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+footer p, footer a {
+    margin: 0;
+    color: #777;
+}
+
+footer a {
+    text-decoration: none;
+    color: #007bff;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
 /* Refresh button styling */
 .refresh {
     margin: 20px 0;
