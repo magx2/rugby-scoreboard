@@ -38,27 +38,6 @@ async function initializeScoreboard() {
     }
 }
 
-async function refreshScoreboard() {
-    showSpinner(); // Show spinner before making the request
-    try {
-        const response = await fetch('/refresh', {
-            method: 'GET',
-            headers: {'Content-Type': 'application/json'},
-        });
-
-        if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        internalUpdate(data);
-    } catch (error) {
-        console.error('Failed to fetch initial score:', error);
-    } finally {
-        hideSpinner(); // Hide spinner after the request completes
-    }
-}
-
 // Function to update the score dynamically
 async function updateScore(team, points) {
     showSpinner(); // Show spinner before making the request
