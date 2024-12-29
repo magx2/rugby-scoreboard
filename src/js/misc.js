@@ -49,6 +49,8 @@ async function xfetch(url, data) {
     }
 }
 
+const spinnerOverlay = document.getElementById('spinner-overlay');
+
 function showSpinner() {
     spinnerOverlay?.classList.add('active');
 }

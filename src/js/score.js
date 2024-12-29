@@ -1,5 +1,4 @@
 const toggle = document.getElementById('toggle-add-remove');
-const spinnerOverlay = document.getElementById('spinner-overlay');
 let homeScore = 0;
 let awayScore = 0;
 
