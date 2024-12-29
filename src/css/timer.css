@@ -111,7 +111,7 @@
     background-color: #218838;
 }
 
-#stop-button:disabled {
+#stop-button:disabled, .time-halves button:disabled {
     background-color: gray;
     color: lightgray;
     cursor: not-allowed;

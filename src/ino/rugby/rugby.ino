@@ -149,23 +149,13 @@ void handleTimeStart() {
     }
 
     int startFrom = doc["startFrom"].as<int>();
-    if (startFrom < 1) {
-        server.send(400, "application/json", "{\"error\":\"Start from cannot be lower than 1!\"}");
+    if (startFrom < 0) {
+        server.send(400, "application/json", "{\"error\":\"Start from cannot be lower than 0!\"}");
         return;
     }
 
     isRunning = true;
     startTime = millis() - (startFrom * ONE_MINUTE);
-    handleTimeStatus();
-}
-
-// handle POST request to "/time/pause"
-void handleTimePause() {
-    if (server.method() != HTTP_POST) {
-        server.send(405, "text/plain", "Method Not Allowed");
-        return;
-    }
-    isRunning = false;
     handleTimeStatus();
 }
 
@@ -251,7 +241,6 @@ void setup() {
   server.on("/refresh", HTTP_GET, handleRefresh);
   // time endpoints
   server.on("/time/start", HTTP_POST, handleTimeStart);
-  server.on("/time/pause", HTTP_POST, handleTimePause);
   server.on("/time/stop", HTTP_POST, handleTimeStop);
   server.on("/time/status", HTTP_GET, handleTimeStatus);
 
