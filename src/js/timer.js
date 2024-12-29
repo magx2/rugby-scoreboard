@@ -47,6 +47,7 @@ class FiniteStateMachine {
         this.state = 'stop';
         this.transitions = {};
         this.timer = 1; // Timer field
+        this.tick = 0;
         this.timerInterval = null; // Timer interval field
         this.eventHandlers = {}; // Event handlers for state transitions
         this.exitHandlers = {}; // Event handlers for state exits
@@ -142,6 +143,14 @@ class FiniteStateMachine {
     getState() {
         return this.state;
     }
+
+    updateProgressBar() {
+        const maxSeconds = 60;
+        const tick = (this.tick % 60) + 1;
+        let progress = (tick / maxSeconds) * 100;
+        if (progress > 100) progress = 100; // Cap at 100%
+        document.getElementById('progress-bar').style.width = progress + '%';
+    }
 }
 
 const fsm = new FiniteStateMachine();
@@ -174,13 +183,17 @@ fsm.onStateEnter("play", () => {
     document.getElementById("second-half").disabled = true;
 
     fsm.timerInterval = setInterval(async () => {
-        fsm.timer++;
-        fsm.updateTimerDisplay();
-        await fsm.refreshData();
-    }, 60 * 1000);
+        fsm.tick++;
+        if (fsm.tick % 60 === 0) {
+            fsm.timer++;
+            fsm.updateTimerDisplay();
+            await fsm.refreshData();
+        }
+        fsm.updateProgressBar();
+    }, 1000);
 });
 fsm.onStateExit("play", () => {
-    clearInterval(this.timerInterval);
+    clearInterval(fsm.timerInterval);
     fsm.timerInterval = null
 })
 fsm.onStateEnter("stop", () => {
@@ -191,6 +204,9 @@ fsm.onStateEnter("stop", () => {
             console.error("Error in startTimerRequest:", error);
             fsm.updateTimerDisplay();
         });
+
+    fsm.tick = 0;
+    document.getElementById('progress-bar').style.width = '0%';
 
     // buttons
     document.getElementById('toggle-play-pause').innerText = '▶️ Play';
